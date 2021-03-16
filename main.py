@@ -93,9 +93,9 @@ class PokerStarsHand(Hand):
                 self.table_size = obj.group(2)
                 self.btn = obj.group(4)
             else:
-                raise HandError('Unknown Play Money table attributes: ' + line)
+                raise HandError('Unknown play money table header: ' + line, self.id)
         else:
-            raise HandError('Unable to parse table attributes: ' + line)
+            raise HandError('Unable to parse table header: ' + line, self.id)
 
     def _parse_hand_header(self):
         line = self.text.getvalue().splitlines()[0]
@@ -113,11 +113,11 @@ class PokerStarsHand(Hand):
             elif obj.group(1) == 'Fixed Limit':
                 self.game_type = 'Fixed Limit'
             else:
-                raise HandError('Game type not recognised: ' + line)
+                raise HandError('Game type not recognised: ' + line, self.id)
 
             self.datetimestamp = obj.group(4)
         else:
-            raise HandError('Unable to parse blind amounts: ' + line)
+            raise HandError('Unable to parse blind amounts: ' + line, self.id)
 
     def _parse_id(self):
         line = self.text.getvalue().splitlines()[0]
@@ -142,6 +142,54 @@ class PokerStarsHand(Hand):
             if lines < 2:
                 lines += 1
             else:
+                obj = re.search(r"\(([0-9]*) in chips\)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r"posts (.*) blind ([0-9]*)", line)
+                if obj:
+                    amount = (int(obj.group(2)) * 0.00001)
+                    line = line.replace(obj.group(2), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r": bets ([0-9]*)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r": calls ([0-9]*)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r": raises ([0-9]*) to ([0-9]*)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                    amount = (int(obj.group(2)) * 0.00001)
+                    line = line.replace(obj.group(2), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r" collected ([0-9]*) from pot", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r" collected \(([0-9]*)\)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r"Total pot ([0-9]*) \| Rake ([0-9]*)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace('pot ' + obj.group(1), "pot ${0:.2f}".format(amount).replace('.00', ''), 1)
+                    amount = (int(obj.group(2)) * 0.00001)
+                    line = line.replace('Rake ' + obj.group(2), "Rake ${0:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r"and won \(([0-9]*)\) with", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r"Uncalled bet \(([0-9]*)\) returned to", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                obj = re.search(r"posts small & big blinds ([0-9]*)", line)
+                if obj:
+                    amount = (int(obj.group(1)) * 0.00001)
+                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
                 print(line.strip())
         print('\n\n')
 
