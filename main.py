@@ -1,3 +1,4 @@
+import sys
 import re
 import codecs
 import io
@@ -58,7 +59,7 @@ class Hand(object):
     def __init__(self, text):
         self.text = io.StringIO(text)
         self._network = None
-        self.datetimestamp = None
+        self.date_time_stamp = None
         self.id = None
         self.play_money = None
         self.table_name = None
@@ -115,7 +116,7 @@ class PokerStarsHand(Hand):
             else:
                 raise HandError('Game type not recognised: ' + line, self.id)
 
-            self.datetimestamp = obj.group(4)
+            self.date_time_stamp = obj.group(4)
         else:
             raise HandError('Unable to parse blind amounts: ' + line, self.id)
 
@@ -135,7 +136,7 @@ class PokerStarsHand(Hand):
 
     def print(self):
         print('PokerStars Hand #' + self.id + ':  Hold\'em ' + self.game_type + ' ($' + self.sb +
-              '/$' + self.bb + ' USD) - ' + self.datetimestamp)
+              '/$' + self.bb + ' USD) - ' + self.date_time_stamp)
         print('Table \'' + self.table_name + '\' ' + self.table_size + ' Seat #' + self.btn + ' is the button')
         lines = 0
         for line in self.text:
@@ -196,7 +197,10 @@ class PokerStarsHand(Hand):
 
 def main():
     try:
-        with HandHistory('testfile.txt') as history:
+        if len(sys.argv) < 2:
+            sys.stderr.write('{} <filename>\n'.format(sys.argv[0]))
+            return
+        with HandHistory(sys.argv[1]) as history:
             errors = 0
             while True:
                 try:
@@ -210,14 +214,13 @@ def main():
                     hand.print()
                 except HandError as e:
                     errors += 1
-                    print(str(e))
-            print(history.hands(), 'hands,', errors, 'errors')
+                    sys.stderr.write(str(e) + '\n')
+            sys.stderr.write('{} hamds, {} errors\n'.format(history.hands(), errors))
     except (IOError, OSError) as e:
-        print(str(e))
+        sys.stderr.write(str(e) + '\n')
     finally:
         pass
 
 
 if __name__ == '__main__':
     main()
-
