@@ -147,9 +147,9 @@ class PokerStarsHand(Hand):
         print('PokerStars Hand #' + self.id + ':  Hold\'em ' + self.game_type + ' ($' + self.sb +
               '/$' + self.bb + ' USD) - ' + self.date_time_stamp)
         print('Table \'' + self.table_name + '\' ' + self.table_size + ' Seat #' + self.btn + ' is the button')
-        lines = 0
+        line_number = 1
         for line in self.text:
-            if lines > 2:
+            if line_number > 2:
                 line = self._convert(r"\(([0-9]*) in chips\)", line)
                 line = self._convert(r"posts (.*) blind ([0-9]*)", line)
                 line = self._convert(r"posts small & big blinds ([0-9]*)", line)
@@ -164,7 +164,7 @@ class PokerStarsHand(Hand):
                 line = self._convert(r"and won \(([0-9]*)\) with", line)
                 print(line.strip())
             else:
-                lines += 1
+                line_number += 1
         print('\n\n')
 
 
