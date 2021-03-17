@@ -215,7 +215,7 @@ def main():
                 except HandError as e:
                     errors += 1
                     sys.stderr.write(str(e) + '\n')
-            sys.stderr.write('{} hamds, {} errors\n'.format(history.hands(), errors))
+            sys.stderr.write('{} hands, {} errors\n'.format(history.hands(), errors))
     except (IOError, OSError) as e:
         sys.stderr.write(str(e) + '\n')
     finally:
