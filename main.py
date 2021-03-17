@@ -134,6 +134,15 @@ class PokerStarsHand(Hand):
         self._parse_table_header()
         self._parse_hand_header()
 
+    def _convert(self, regex, line):
+        obj = re.search(regex, line)
+        if obj:
+            for index in range(1, len(obj.groups()) + 1):
+                if obj.group(index).isdigit():
+                    amount = (int(obj.group(index)) * 0.00001)
+                    line = re.sub(obj.group(index), "${:.2f}".format(amount).replace('.00', ''), line)
+        return line
+
     def print(self):
         print('PokerStars Hand #' + self.id + ':  Hold\'em ' + self.game_type + ' ($' + self.sb +
               '/$' + self.bb + ' USD) - ' + self.date_time_stamp)
@@ -143,54 +152,17 @@ class PokerStarsHand(Hand):
             if lines < 2:
                 lines += 1
             else:
-                obj = re.search(r"\(([0-9]*) in chips\)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r"posts (.*) blind ([0-9]*)", line)
-                if obj:
-                    amount = (int(obj.group(2)) * 0.00001)
-                    line = line.replace(obj.group(2), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r": bets ([0-9]*)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r": calls ([0-9]*)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r": raises ([0-9]*) to ([0-9]*)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                    amount = (int(obj.group(2)) * 0.00001)
-                    line = line.replace(obj.group(2), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r" collected ([0-9]*) from pot", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r" collected \(([0-9]*)\)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r"Total pot ([0-9]*) \| Rake ([0-9]*)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace('pot ' + obj.group(1), "pot ${0:.2f}".format(amount).replace('.00', ''), 1)
-                    amount = (int(obj.group(2)) * 0.00001)
-                    line = line.replace('Rake ' + obj.group(2), "Rake ${0:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r"and won \(([0-9]*)\) with", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r"Uncalled bet \(([0-9]*)\) returned to", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
-                obj = re.search(r"posts small & big blinds ([0-9]*)", line)
-                if obj:
-                    amount = (int(obj.group(1)) * 0.00001)
-                    line = line.replace(obj.group(1), "${:.2f}".format(amount).replace('.00', ''), 1)
+                line = self._convert(r"\(([0-9]*) in chips\)", line)
+                line = self._convert(r"posts (.*) blind ([0-9]*)", line)
+                line = self._convert(r": bets ([0-9]*)", line)
+                line = self._convert(r": calls ([0-9]*)", line)
+                line = self._convert(r": raises ([0-9]*) to ([0-9]*)", line)
+                line = self._convert(r" collected ([0-9]*) from pot", line)
+                line = self._convert(r" collected \(([0-9]*)\)", line)
+                line = self._convert(r"Total pot ([0-9]*) \| Rake ([0-9]*)", line)
+                line = self._convert(r"and won \(([0-9]*)\) with", line)
+                line = self._convert(r"Uncalled bet \(([0-9]*)\) returned to", line)
+                line = self._convert(r"posts small & big blinds ([0-9]*)", line)
                 print(line.strip())
         print('\n\n')
 
