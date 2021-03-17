@@ -149,21 +149,22 @@ class PokerStarsHand(Hand):
         print('Table \'' + self.table_name + '\' ' + self.table_size + ' Seat #' + self.btn + ' is the button')
         lines = 0
         for line in self.text:
-            if lines < 2:
-                lines += 1
-            else:
+            if lines > 2:
                 line = self._convert(r"\(([0-9]*) in chips\)", line)
                 line = self._convert(r"posts (.*) blind ([0-9]*)", line)
                 line = self._convert(r": bets ([0-9]*)", line)
                 line = self._convert(r": calls ([0-9]*)", line)
                 line = self._convert(r": raises ([0-9]*) to ([0-9]*)", line)
-                line = self._convert(r" collected ([0-9]*) from pot", line)
+                line = self._convert(r" collected ([0-9]*)", line)
                 line = self._convert(r" collected \(([0-9]*)\)", line)
                 line = self._convert(r"Total pot ([0-9]*) \| Rake ([0-9]*)", line)
+                line = self._convert(r"Total pot ([0-9]*). Main pot ([0-9]*). Side pot ([0-9]*). \| Rake ([0-9]*)", line)
                 line = self._convert(r"and won \(([0-9]*)\) with", line)
                 line = self._convert(r"Uncalled bet \(([0-9]*)\) returned to", line)
                 line = self._convert(r"posts small & big blinds ([0-9]*)", line)
                 print(line.strip())
+            else:
+                lines += 1
         print('\n\n')
 
 
